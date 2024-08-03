@@ -4,7 +4,7 @@ const userModel = {
     getUserList: async () => {
         const result = await db
             .select('vName as name', 'vToken as token', 'eStatus as status')
-            .from('moduser')
+            .from('mod_user')
             .whereRaw('1=1')
         return result;
     },
