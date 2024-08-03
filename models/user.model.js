@@ -3,9 +3,12 @@ import db from "../config/db.connection.js";
 const userModel = {
     getUserList: async () => {
         const result = await db
-            .select('vName as name', 'vToken as token', 'eStatus as status')
-            .from('mod_user')
-            .whereRaw('1=1')
+            .select('mu.iAdminId as user_id', 'mu.vName AS user_name', 'mu.eStatus AS user_status',
+                'dm.iDiscordMasterId as discord_id', 'dm.vShortCode as discord_name')
+            .from('mod_user as mu')
+            .leftJoin('user_discord_transition as udt', 'udt.iAdminId', 'mu.iAdminId')
+            .leftJoin('discord_master as dm', 'dm.iDiscordMasterId', 'udt.iDiscordMasterId')
+            .where('mu.eStatus','Active')
         return result;
     },
     getDiscordInfo: async(short_code) => {
