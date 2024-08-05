@@ -47,7 +47,7 @@ io.on("connection", async (socket) => {
       // TODO handle the failure
       return;
     }
-    const { user_name } = userModel.getUserNameById(user_id);
+    const { user_name } = await userModel.getUserNameById(user_id);
     const return_obj = {
       message,
       discord_id: discord_info.discord_master_id,
