@@ -15,13 +15,12 @@ import userModel from "./models/user.model.js";
 
 const app = express();
 const server = createServer(app);
-const io = new Server(server,{
+const io = new Server(server, {
   // connectionStateRecovery: {}
   cors: {
     origin: "*", // Change this to the URL of your client
     // methods: ["GET", "POST"]
-  }
-
+  },
 });
 const form = multer();
 
@@ -33,24 +32,31 @@ app.use(cors({ credentials: true, origin: "*" }));
 app.use(cookieParser());
 app.use(express.json());
 
-io.on('connection', (socket) => {
-  const discord_name = 'gaming_discord'
-  socket.on(discord_name, async (msg) => {
-    console.log("msg---->>",msg);
-    let result;
+io.on("connection", (socket) => {
+  console.log({ socket_info: socket });
+  const discord_info = userModel.getDiscordInfo("gaming_discord");
+  const discord_name = discord_info.discord_name;
+  socket.on(discord_name, async ({ message, user_id }) => {
+    console.log("msg---->>", message);
     try {
-      const discord_info = userModel.getDiscordInfo(discord_name);
       const add_data = {
-        tMessage:msg,
-        iDiscordMasterId:discord_info.discord_master_id,
-        iAdminId:1
-      }
+        tMessage: message,
+        iDiscordMasterId: discord_info.discord_master_id,
+        iAdminId: user_id || 1, // want user_id
+      };
       await userModel.addUserMessage(add_data);
     } catch (e) {
       // TODO handle the failure
       return;
     }
-    io.emit(discord_name, msg);
+    const { user_name } = userModel.getUserNameById(user_id);
+    const return_obj = {
+      message: msg,
+      discord_id: discord_info.discord_master_id,
+      user_id: user_id,
+      user_name: user_name,
+    };
+    io.emit(discord_name, return_obj);
   });
 });
 app.use("/access", router);
