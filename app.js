@@ -32,12 +32,10 @@ app.use(cors({ credentials: true, origin: "*" }));
 app.use(cookieParser());
 app.use(express.json());
 
-io.on("connection", (socket) => {
-  console.log({ socket_info: socket });
-  const discord_info = userModel.getDiscordInfo("gaming_discord");
+io.on("connection", async (socket) => {
+  const discord_info = await userModel.getDiscordInfo("gaming_discord");
   const discord_name = discord_info.discord_name;
   socket.on(discord_name, async ({ message, user_id }) => {
-    console.log("msg---->>", message);
     try {
       const add_data = {
         tMessage: message,
@@ -51,7 +49,7 @@ io.on("connection", (socket) => {
     }
     const { user_name } = userModel.getUserNameById(user_id);
     const return_obj = {
-      message: msg,
+      message,
       discord_id: discord_info.discord_master_id,
       user_id: user_id,
       user_name: user_name,
