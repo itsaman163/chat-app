@@ -42,7 +42,9 @@ const userModel = {
         "dm.tMessage as message",
         "dm.iDiscordMasterId as discord_id",
         "dm.iAdminId as user_id",
-        "mu.vName as user_name"
+        "mu.vName as user_name",
+        "dm.iDiscordMessageId as discord_message_id",
+        "dm.iSysRecDeleted as is_delete"
       )
       .from("discord_message as dm")
       .leftJoin("mod_user as mu", "mu.iAdminId", "dm.iAdminId")
@@ -56,6 +58,12 @@ const userModel = {
       .where("iAdminId", user_id)
       .limit(1)
       .first();
+    return result;
+  },
+  updateUserMessage: async (update_data, where_cond) => {
+    const result = await db("discord_message")
+      .update(update_data)
+      .whereRaw(where_cond);
     return result;
   },
 };

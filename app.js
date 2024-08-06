@@ -35,27 +35,49 @@ app.use(express.json());
 io.on("connection", async (socket) => {
   const discord_info = await userModel.getDiscordInfo("gaming_discord");
   const discord_name = discord_info.discord_name;
-  socket.on(discord_name, async ({ message, user_id }) => {
-    try {
-      const add_data = {
-        tMessage: message,
-        iDiscordMasterId: discord_info.discord_master_id,
-        iAdminId: user_id || 1, // want user_id
-      };
-      await userModel.addUserMessage(add_data);
-    } catch (e) {
-      // TODO handle the failure
-      return;
+  socket.on(
+    discord_name,
+    async ({ message, user_id, type = "add", discord_message_id = "" }) => {
+      try {
+        const { user_name } = await userModel.getUserNameById(user_id);
+        const return_obj = {
+          message,
+          discord_id: discord_info.discord_master_id,
+          user_id: user_id,
+          user_name: user_name,
+          discord_message_id,
+          soft_delete: 0,
+        };
+        const operational_data = {
+          tMessage: message,
+          iDiscordMasterId: discord_info.discord_master_id,
+          iAdminId: user_id || 1, // want user_id
+        };
+        if (type === "add") {
+          const result = await userModel.addUserMessage(operational_data);
+          return_obj.discord_message_id = result[0];
+        }
+        if (type === "update") {
+          const where_cond = `iDiscordMessageId = ${discord_message_id}`;
+          await userModel.updateUserMessage(operational_data, where_cond);
+        }
+
+        if (type === "delete") {
+          const where_cond = `iDiscordMessageId = ${discord_message_id}`;
+          return_obj.soft_delete = 1;
+          const delete_data = {
+            iSysRecDeleted: return_obj.soft_delete,
+          };
+          await userModel.updateUserMessage(delete_data, where_cond);
+        }
+
+        io.emit(discord_name, return_obj);
+      } catch (e) {
+        // TODO handle the failure
+        return;
+      }
     }
-    const { user_name } = await userModel.getUserNameById(user_id);
-    const return_obj = {
-      message,
-      discord_id: discord_info.discord_master_id,
-      user_id: user_id,
-      user_name: user_name,
-    };
-    io.emit(discord_name, return_obj);
-  });
+  );
 });
 app.use("/access", router);
 // app.use(pathErrorHandler);
