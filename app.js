@@ -65,9 +65,9 @@ io.on("connection", async (socket) => {
 
         if (type === "delete") {
           const where_cond = `iDiscordMessageId = ${discord_message_id}`;
-          return_obj.soft_delete = 1;
+          return_obj.is_delete = 1;
           const delete_data = {
-            iSysRecDeleted: return_obj.soft_delete,
+            iSysRecDeleted: return_obj.is_delete,
           };
           await userModel.updateUserMessage(delete_data, where_cond);
         }
