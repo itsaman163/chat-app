@@ -46,7 +46,8 @@ io.on("connection", async (socket) => {
           user_id: user_id,
           user_name: user_name,
           discord_message_id,
-          soft_delete: 0,
+          is_delete: 0,
+          type
         };
         const operational_data = {
           tMessage: message,
