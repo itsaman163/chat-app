@@ -33,7 +33,8 @@ app.use(cookieParser());
 app.use(express.json());
 
 io.on("connection", async (socket) => {
-  const discord_info = await userModel.getDiscordInfo("gaming_discord");
+  const discord_code = socket.handshake.query.discord_code;
+  const discord_info = await userModel.getDiscordInfo(discord_code);
   const discord_name = discord_info.discord_name;
   socket.on(
     discord_name,
@@ -54,16 +55,16 @@ io.on("connection", async (socket) => {
           iDiscordMasterId: discord_info.discord_master_id,
           iAdminId: user_id || 1, // want user_id
         };
-        if (type === "add") {
+        if (type.toLocaleLowerCase() === "add") {
           const result = await userModel.addUserMessage(operational_data);
           return_obj.discord_message_id = result[0];
         }
-        if (type === "update") {
+        if (type.toLocaleLowerCase() === "update") {
           const where_cond = `iDiscordMessageId = ${discord_message_id}`;
           await userModel.updateUserMessage(operational_data, where_cond);
         }
 
-        if (type === "delete") {
+        if (type.toLocaleLowerCase() === "delete") {
           const where_cond = `iDiscordMessageId = ${discord_message_id}`;
           return_obj.is_delete = 1;
           const delete_data = {
