@@ -37,7 +37,7 @@ const userModel = {
     return result;
   },
   getDiscordMessages: async (where_cond) => {
-    const result = await db
+    const result =  db
       .select(
         "dm.tMessage as message",
         "dm.iDiscordMasterId as discord_id",
@@ -49,6 +49,7 @@ const userModel = {
       .from("discord_message as dm")
       .leftJoin("mod_user as mu", "mu.iAdminId", "dm.iAdminId")
       .whereRaw(where_cond);
+      console.log(result.toString());
     return result;
   },
   getUserNameById: async (user_id) => {

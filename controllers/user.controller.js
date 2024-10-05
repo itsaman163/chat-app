@@ -12,6 +12,7 @@ const User = {
   getDiscordMessages: async (req, res, next) => {
     try {
       const { discord_id = 0 } = req.body;
+      console.log("sdf");
       if(!discord_id) return API_RESPONSE.apiFailure(res,"discord_id is required!!");
       const where_cond = `iDiscordMasterId = ${discord_id}`;
       const discord_msg_data = await userModel.getDiscordMessages(where_cond);
